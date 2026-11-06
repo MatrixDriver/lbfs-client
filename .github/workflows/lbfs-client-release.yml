@@ -64,6 +64,6 @@ jobs:
           fi
           source_commit=$(cat release-assets/source-commit.txt)
           printf 'AgentBaseFS macOS binaries from private source commit `%s`.\n\n' "$source_commit" > release-notes.md
-          printf 'Includes arm64 and x86_64 Agent and trusted builds. SHA256SUMS is signed by the private lakeon release workflow.\n' >> release-notes.md
+          printf 'Includes arm64 and x86_64 Agent and trusted builds. SHA256SUMS is signed by this public release workflow. Private build provenance is verified when supplied.\n' >> release-notes.md
           gh release create "$tag" release-assets/*.tar.gz release-assets/SHA256SUMS \
-            release-assets/SHA256SUMS*.sigstore.json --target main --title "$tag" --notes-file release-notes.md
+            release-assets/SHA256SUMS*.sigstore.json --target main --latest=false --title "$tag" --notes-file release-notes.md
