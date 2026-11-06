@@ -3,7 +3,7 @@ name: Publish signed AgentBaseFS release
 on:
   push:
     branches:
-      - 'staging/abfs-v*'
+      - 'staging/lbfs-v*'
 
 permissions:
   contents: write
@@ -19,15 +19,15 @@ jobs:
         run: |
           set -euo pipefail
           tag=${GITHUB_REF_NAME#staging/}
-          case "$tag" in abfs-v*) ;; *) echo 'invalid staging branch' >&2; exit 1 ;; esac
+          case "$tag" in lbfs-v*) ;; *) echo 'invalid staging branch' >&2; exit 1 ;; esac
           test -s release-assets/SHA256SUMS
           test "$(find release-assets -maxdepth 1 -name '*.tar.gz' | wc -l | tr -d ' ')" = 4
           test "$(wc -l < release-assets/SHA256SUMS | tr -d ' ')" = 4
           for arch in arm64 x86_64; do
             for profile in agent trusted; do
-              asset="abfs-macos-${arch}-${profile}.tar.gz"
+              asset="lbfs-macos-${arch}-${profile}.tar.gz"
               test -s "release-assets/$asset"
-              test "$(tar -tzf "release-assets/$asset")" = abfs
+              test "$(tar -tzf "release-assets/$asset")" = lbfs
               test "$(awk -v name="$asset" '$2 == name { count++ } END { print count+0 }' release-assets/SHA256SUMS)" = 1
             done
           done
@@ -35,7 +35,7 @@ jobs:
           if test -s release-assets/SHA256SUMS.sigstore.json; then
             cosign verify-blob \
               --bundle release-assets/SHA256SUMS.sigstore.json \
-              --certificate-identity "https://github.com/MatrixDriver/lakeon/.github/workflows/abfs-client-release.yml@refs/tags/$tag" \
+              --certificate-identity "https://github.com/MatrixDriver/lakeon/.github/workflows/lbfs-client-release.yml@refs/tags/$tag" \
               --certificate-oidc-issuer https://token.actions.githubusercontent.com \
               release-assets/SHA256SUMS
             mv release-assets/SHA256SUMS.sigstore.json release-assets/SHA256SUMS.private.sigstore.json
@@ -49,7 +49,7 @@ jobs:
           cosign sign-blob --yes --bundle release-assets/SHA256SUMS.sigstore.json release-assets/SHA256SUMS
           cosign verify-blob \
             --bundle release-assets/SHA256SUMS.sigstore.json \
-            --certificate-identity "https://github.com/MatrixDriver/abfs-client/.github/workflows/abfs-client-release.yml@${GITHUB_REF}" \
+            --certificate-identity "https://github.com/MatrixDriver/lbfs-client/.github/workflows/lbfs-client-release.yml@${GITHUB_REF}" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             release-assets/SHA256SUMS
       - name: Publish release
